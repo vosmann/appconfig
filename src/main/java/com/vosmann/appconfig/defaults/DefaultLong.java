@@ -1,5 +1,5 @@
 package com.vosmann.appconfig.defaults;
 
-public @interface DefaultLongValue {
+public @interface DefaultLong {
     long value();
 }

@@ -1,5 +1,5 @@
 package com.vosmann.appconfig.defaults;
 
-public @interface DefaultStringValue {
+public @interface DefaultString {
     String value();
 }

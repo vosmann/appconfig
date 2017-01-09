@@ -1,5 +1,5 @@
 package com.vosmann.appconfig.defaults;
 
-public @interface DefaultIntValue {
+public @interface DefaultInt {
     int value();
 }

@@ -1,5 +1,5 @@
 package com.vosmann.appconfig.defaults;
 
-public @interface DefaultBooleanValue {
+public @interface DefaultBoolean {
     boolean value();
 }
