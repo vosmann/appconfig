@@ -1,8 +1,6 @@
 package com.vosmann.appconfig;
 
-import com.google.common.collect.Maps;
-
-import java.util.Map;
+import com.google.common.base.Objects;
 
 public class Field {
 
@@ -22,24 +20,30 @@ public class Field {
         return type;
     }
 
-    public static class FieldStorage {
-        private Map<String, Field> fields;
-
-        private FieldStorage(Builder builder) {
-            this.fields = builder.fields;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
         }
-
-        public static class Builder {
-            private Map<String, Field> fields = Maps.newHashMap();
-            public FieldStorage.Builder add(String name, Class<?> type) {
-                fields.put(name, new Field(name, type));
-                return this;
-            }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
         }
+        Field field = (Field) o;
+        return Objects.equal(key, field.key) &&
+                Objects.equal(type, field.type);
+    }
 
-        // public FieldStorage build() {
-        //     return new FieldStorage(this);
-        // }
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(key, type);
+    }
+
+    @Override
+    public String toString() {
+        return "Field{" +
+                "key='" + key + '\'' +
+                ", type=" + type +
+                '}';
     }
 
 }

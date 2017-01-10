@@ -4,9 +4,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.ValueNode;
+import com.google.common.io.Resources;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,9 +16,26 @@ public class TotalConfig {
 
     private Map<String, Object> allConfigs;
 
-    public static TotalConfig fromDefaultLocation() throws IOException {
+    public static TotalConfig fromDefaultLocation() {
+        return from("src/test/resources/appconfig.json");
+    }
+
+    public static TotalConfig from(String location) {
+        try {
+            return from(new FileInputStream(location));
+        } catch (IOException e) {
+            throw new AppConfigException("Could not read file.", e);
+        }
+    }
+
+    public static TotalConfig from(InputStream inputStream) {
         ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode root = objectMapper.readTree(new File("src/test/resources/appconfig.json"));
+        final JsonNode root;
+        try {
+            root = objectMapper.readTree(inputStream);
+        } catch (IOException e) {
+            throw new AppConfigException("Could not read file.", e);
+        }
         return new TotalConfig(JsonFlattener.flatten(root));
     }
 
@@ -78,5 +95,10 @@ public class TotalConfig {
 
             return currentPath + "." + newPathElement;
         }
+    }
+
+    @Override
+    public String toString() {
+        return "TotalConfig{allConfigs=" + allConfigs + '}';
     }
 }
