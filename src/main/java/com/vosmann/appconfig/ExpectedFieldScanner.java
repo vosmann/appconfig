@@ -9,18 +9,18 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toSet;
 
-public class ExpectedFieldFinder {
+public class ExpectedFieldScanner {
 
     private static final String ALL_PACKAGES_PREFIX = "";
 
-    public static Set<ExpectedField> findExpectedFields() {
-        final Set<ExpectedField> fields = findAppConfigInterfaces().map(ExpectedFieldFinder::extractExpectedFields)
+    public static Set<ExpectedField> scanExpectedFields() {
+        final Set<ExpectedField> fields = scanAppConfigInterfaces().map(ExpectedFieldScanner::extractExpectedFields)
                                                                    .flatMap(fs -> fs.stream())
                                                                    .collect(toSet());
         return fields;
     }
 
-    private static Stream<Class<?>> findAppConfigInterfaces() {
+    private static Stream<Class<?>> scanAppConfigInterfaces() {
         final Reflections reflections = new Reflections(ALL_PACKAGES_PREFIX);
         final Set<Class<?>> annotated = reflections.getTypesAnnotatedWith(AppConfig.class);
         return annotated.stream()
