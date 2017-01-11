@@ -4,9 +4,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.ValueNode;
-import com.google.common.io.Resources;
 
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,58 +21,52 @@ public class TotalConfig {
         return from("src/test/resources/appconfig.json");
     }
 
-    public static TotalConfig from(String location) {
+    public static TotalConfig from(final String location) {
         try {
             return from(new FileInputStream(location));
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new AppConfigException("Could not read file.", e);
         }
     }
 
-    public static TotalConfig from(InputStream inputStream) {
-        ObjectMapper objectMapper = new ObjectMapper();
+    public static TotalConfig from(final InputStream inputStream) {
+        final ObjectMapper objectMapper = new ObjectMapper();
         final JsonNode root;
         try {
             root = objectMapper.readTree(inputStream);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new AppConfigException("Could not read file.", e);
         }
         return new TotalConfig(JsonFlattener.flatten(root));
     }
 
-    private TotalConfig(Map<String, Object> allConfigs) {
+    private TotalConfig(final Map<String, Object> allConfigs) {
         this.allConfigs = copyOf(allConfigs);
     }
 
-
-    public <T> T get(String key) {
+    public <T> T get(final String key) {
         return (T) allConfigs.get(key);
     }
 
     public static class JsonFlattener {
 
-        public static Map<String, Object> flatten(JsonNode json) {
-            Map<String, Object> map = new HashMap<>();
-            String initialKeyPrefix = "";
+        public static Map<String, Object> flatten(final JsonNode json) {
+            final Map<String, Object> map = new HashMap<>();
+            final String initialKeyPrefix = "";
             addKeys(json, initialKeyPrefix, map);
             return map;
         }
 
-        private static void addKeys(JsonNode node, String currentPath, Map<String, Object> map) {
+        private static void addKeys(final JsonNode node, final String currentPath, final Map<String, Object> map) {
             if (node.isObject()) {
-                ObjectNode object = (ObjectNode) node;
+                final ObjectNode object = (ObjectNode) node;
                 object.fields()
-                      .forEachRemaining(entry -> addKeys(entry.getValue(), nextPath(currentPath, entry.getKey()),  map));
+                      .forEachRemaining(entry -> addKeys(entry.getValue(), nextPath(currentPath, entry.getKey()), map));
 
             } else if (node.isArray()) {
-                // todo support integer, floating point and string arrays.
-                // ArrayNode arrayNode = (ArrayNode) node;
-                // arrayNode.elements()
-                //          .forEachRemaining();
-                // addKeys(currentPath + "[" + i + "]", arrayNode.get(i), map);
-                // }
+                throw new IllegalArgumentException("Array values not supported.");
             } else if (node.isValueNode()) {
-                ValueNode valueNode = (ValueNode) node;
+                final ValueNode valueNode = (ValueNode) node;
                 if (valueNode.isInt()) {
                     map.put(currentPath, valueNode.asInt());
                 } else if (valueNode.isLong()) {
@@ -88,7 +83,7 @@ public class TotalConfig {
             }
         }
 
-        private static String nextPath(String currentPath, String newPathElement) {
+        private static String nextPath(final String currentPath, final String newPathElement) {
             if (currentPath.isEmpty()) {
                 return newPathElement;
             }
