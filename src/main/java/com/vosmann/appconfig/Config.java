@@ -1,10 +1,9 @@
 package com.vosmann.appconfig;
 
-import com.google.common.collect.Sets;
-
 import java.io.InputStream;
 import java.util.Set;
 
+import static com.google.common.collect.Sets.difference;
 import static com.vosmann.appconfig.ExpectedFieldScanner.scanExpectedFields;
 import static java.util.stream.Collectors.toSet;
 
@@ -40,15 +39,17 @@ public class Config {
             return true;
         }
 
+        // Assert type correctness.
+
         return false;
     }
 
     private void logUnexpectedConfigs() {
-        final Set<String> available = jsonConfig.getKeys();
+        final Set<String> all = jsonConfig.getKeys();
         final Set<String> expected = fields.stream()
                                            .map(ExpectedField::getKey)
                                            .collect(toSet());
-        final Set<String> unexpected = Sets.difference(available, expected);
+        final Set<String> unexpected = difference(all, expected);
         System.out.println("Unexpected configs found: " + unexpected);
     }
 
