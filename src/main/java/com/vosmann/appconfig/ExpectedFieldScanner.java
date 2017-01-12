@@ -7,11 +7,21 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import static com.vosmann.appconfig.AllowedType.isAllowedReturnType;
 import static java.util.stream.Collectors.toSet;
 
 public class ExpectedFieldScanner {
 
     private static final String ALL_PACKAGES_PREFIX = "";
+    private static final Set<Class<?>> ALLOWED_CONFIG_TYPES;
+
+    static {
+        ALLOWED_CONFIG_TYPES = new HashSet<>();
+        ALLOWED_CONFIG_TYPES.add(boolean.class);
+        ALLOWED_CONFIG_TYPES.add(int.class);
+        ALLOWED_CONFIG_TYPES.add(double.class);
+        ALLOWED_CONFIG_TYPES.add(String.class);
+    }
 
     public static Set<ExpectedField> scanExpectedFields() {
         final Set<ExpectedField> fields = scanAppConfigInterfaces().map(ExpectedFieldScanner::extractExpectedFields)
@@ -35,15 +45,15 @@ public class ExpectedFieldScanner {
         for (final Method method : i.getMethods()) {
 
             final String methodName = method.getName();
+            final Class<?> type = method.getReturnType();
 
-            if (!isNormalGetter(methodName) && !isBooleanGetter(methodName)) {
-                throw new AppConfigException("Unexpected method in interface.");
-            }
+            assertAllowed(methodName);
+            assertAllowed(type);
 
             final String fieldName = toFieldName(methodName);
-
             final String key = prefix + "." + fieldName;
-            fields.add(new ExpectedField(key, method.getReturnType()));
+
+            fields.add(new ExpectedField(key, type));
         }
 
         return fields;
@@ -63,6 +73,18 @@ public class ExpectedFieldScanner {
 
     private static boolean isBooleanGetter(final String methodName) {
         return methodName.startsWith("is") && methodName.charAt(3) == methodName.toUpperCase().charAt(3);
+    }
+
+    private static void assertAllowed(final String methodName) {
+        if (!isNormalGetter(methodName) && !isBooleanGetter(methodName)) {
+            throw new AppConfigException("Unexpected method name in interface: " + methodName);
+        }
+    }
+
+    private static void assertAllowed(final Class<?> type) {
+        if (!isAllowedReturnType(type)) {
+            throw new AppConfigException("Unexpected config type in interface: " + type);
+        }
     }
 
 }

@@ -90,6 +90,10 @@ public class JsonConfig {
         return config.keySet();
     }
 
+    public boolean contains(final String key) {
+        return config.containsKey(key);
+    }
+
     public Object get(final String key) {
         return config.get(key);
     }

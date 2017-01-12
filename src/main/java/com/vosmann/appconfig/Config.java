@@ -4,9 +4,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.InputStream;
+import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.collect.Sets.difference;
+import static com.vosmann.appconfig.AllowedType.getSimpleType;
 import static com.vosmann.appconfig.ExpectedFieldScanner.scanExpectedFields;
 import static java.util.stream.Collectors.toSet;
 
@@ -25,25 +27,32 @@ public class Config {
         logUnexpectedConfigs();
         final Set<String> missingConfigs = findMissingConfigs();
         if (!missingConfigs.isEmpty()) {
-            throw new AppConfigException("Missing configs: " + missingConfigs);
+            throw new AppConfigException("Missing or wrongly typed configs: " + missingConfigs);
         }
     }
 
     private Set<String> findMissingConfigs() {
         return fields.stream()
-                     .filter(this::isConfigMissing)
+                     .filter(this::isConfigMissingOrWronglyTyped)
                      .map(ExpectedField::getKey)
                      .collect(toSet());
     }
 
-    private boolean isConfigMissing(final ExpectedField field) {
+    private boolean isConfigMissingOrWronglyTyped(final ExpectedField field) {
 
-        final Object value = jsonConfig.get(field.getKey());
-        if (value == null) {
+        if (!jsonConfig.contains(field.getKey())) {
             return true;
         }
 
-        // Assert type correctness.
+        final Object value = jsonConfig.get(field.getKey());
+        final Optional<Class<?>> valueType = getSimpleType(value);
+        if (!valueType.isPresent()) {
+            return true;
+        }
+
+        if (field.getType() != valueType.get()) {
+            return true;
+        }
 
         return false;
     }
@@ -57,8 +66,8 @@ public class Config {
         LOG.warn("Unexpected configs found: {}.", unexpected);
     }
 
-    // public <T> T get(final String key) {
-    //     return (T) allConfigs.get(key);
-    // }
+    public Object get(final String key) {
+        return jsonConfig.get(key);
+    }
 
 }
