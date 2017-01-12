@@ -1,5 +1,8 @@
 package com.vosmann.appconfig;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.InputStream;
 import java.util.Set;
 
@@ -9,20 +12,21 @@ import static java.util.stream.Collectors.toSet;
 
 public class Config {
 
+    private static final Logger LOG = LogManager.getLogger(Config.class);
+
     private final Set<ExpectedField> fields;
     private final JsonConfig jsonConfig;
 
     public Config(final InputStream appConfigFileStream) {
         fields = scanExpectedFields();
         jsonConfig = JsonConfig.from(appConfigFileStream);
-        System.out.println(jsonConfig);
-        System.out.println(fields);
+        LOG.info(jsonConfig);
+        LOG.info(fields);
         logUnexpectedConfigs();
         final Set<String> missingConfigs = findMissingConfigs();
         if (!missingConfigs.isEmpty()) {
             throw new AppConfigException("Missing configs: " + missingConfigs);
         }
-        // assert that configExpectation.isSatisfiedBy(config). otherwise throw
     }
 
     private Set<String> findMissingConfigs() {
@@ -50,7 +54,7 @@ public class Config {
                                            .map(ExpectedField::getKey)
                                            .collect(toSet());
         final Set<String> unexpected = difference(all, expected);
-        System.out.println("Unexpected configs found: " + unexpected);
+        LOG.warn("Unexpected configs found: {}.", unexpected);
     }
 
     // public <T> T get(final String key) {
