@@ -32,7 +32,7 @@ public class ExpectedFieldScanner {
         return fields;
     }
 
-    private static Stream<Class<?>> scanAppConfigInterfaces() {
+    public static Stream<Class<?>> scanAppConfigInterfaces() {
         final Reflections reflections = new Reflections(ALL_PACKAGES_PREFIX);
         final Set<Class<?>> annotated = reflections.getTypesAnnotatedWith(AppConfig.class);
         return annotated.stream()

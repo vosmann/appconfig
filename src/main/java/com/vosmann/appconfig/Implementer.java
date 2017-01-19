@@ -22,6 +22,16 @@ public class Implementer {
         return implementation;
     }
 
+    public Object implement2(final Class<?> interfaceType) {
+        final String prefix = interfaceType.getAnnotation(AppConfig.class).prefix();
+        final Object interfaceImplementation = Proxy.newProxyInstance(interfaceType.getClassLoader(),
+                                                                      new Class[]{interfaceType},
+                                                                      new InterfaceMethodHandler(prefix, config));
+
+        final Object implementation = interfaceType.cast(interfaceImplementation);
+        return implementation;
+    }
+
     public static class InterfaceMethodHandler implements InvocationHandler {
 
         private final String prefix;
