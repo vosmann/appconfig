@@ -49,6 +49,7 @@ public class ExpectedFieldScanner {
 
             assertAllowed(methodName);
             assertAllowed(type);
+            assertAllowed(method.getParameterCount());
 
             final String fieldName = toFieldName(methodName);
             final String key = prefix + "." + fieldName;
@@ -83,7 +84,13 @@ public class ExpectedFieldScanner {
 
     private static void assertAllowed(final Class<?> type) {
         if (!isAllowedReturnType(type)) {
-            throw new AppConfigException("Unexpected config type in interface: " + type);
+            throw new AppConfigException("Unsupported return value on config method: " + type);
+        }
+    }
+
+    private static void assertAllowed(final int parameterCount) {
+        if (parameterCount > 0) {
+            throw new AppConfigException("Config methods should not have any parameters.");
         }
     }
 

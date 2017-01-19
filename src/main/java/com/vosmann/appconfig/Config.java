@@ -38,6 +38,7 @@ public class Config {
                      .collect(toSet());
     }
 
+    // todo this should be done on an interface-by-interface level. later.
     private boolean isConfigMissingOrWronglyTyped(final ExpectedField field) {
 
         if (!jsonConfig.contains(field.getKey())) {

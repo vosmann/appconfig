@@ -3,33 +3,45 @@ package com.vosmann.appconfig;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.Map;
+
+import static com.google.common.collect.ImmutableMap.of;
 
 public class Implementer {
 
-    public <T> T implement(final Class<?> type, final Config totalConfig) {
-        final EndpointConfig config = (EndpointConfig) Proxy.newProxyInstance(EndpointConfig.class.getClassLoader(),
-                                                                              new Class[]{EndpointConfig.class},
-                                                                              new Handler());
-        return null;
+    private final Config config;
+
+    public Implementer(final Config config) {
+        this.config = config;
     }
 
-    public static class Handler implements InvocationHandler {
+    public <T> T implement(final Class<T> interfaceType) {
+        // final Object interfaceImplementation = Proxy.newProxyInstance(input.getClass().getClassLoader(),
+        //                                                               new Class[]{input.getClass()},
+        //                                                               new InterfaceMethodHandler(config));
+        final Object interfaceImplementation = Proxy.newProxyInstance(interfaceType.getClassLoader(),
+                                                                      new Class[]{interfaceType},
+                                                                      new InterfaceMethodHandler(config));
+        final T implementation = (T) interfaceImplementation;
+        return implementation;
+    }
 
-        private Config config;
-        private String prefix;
+    public static class InterfaceMethodHandler implements InvocationHandler {
+
+        private final Config config;
+        private final Map<String, ExpectedField> expectedFields =
+                of("getHost", new ExpectedField("tracking.endpoint.host", String.class),
+                   "getPort", new ExpectedField("tracking.endpoint.port", int.class));
+
+        public InterfaceMethodHandler(final Config config) {
+            this.config = config;
+        }
 
         @Override
         public Object invoke(final Object proxy, final Method method, final Object[] args) {
-            final String methodName = method.getName();
-            final Class<?>[] classes = method.getParameterTypes();
-            // int.class
-
-            // if (methodName.equals("getHost")) {
-            //     return config.get(prefix + "." + "host");
-            // } else if (methodName.equals("getPort")) {
-            //     return config.get(prefix + "." + "port");
-            // }
-            return null;
+            final ExpectedField expectedField = expectedFields.get(method.getName());
+            final Object value = config.get(expectedField.getKey());
+            return value;
         }
     }
 
