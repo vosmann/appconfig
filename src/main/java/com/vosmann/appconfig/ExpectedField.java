@@ -4,15 +4,15 @@ import com.google.common.base.Objects;
 
 public class ExpectedField {
 
-    private final String key;
+    private final FieldKey key;
     private final Class<?> type;
 
-    public ExpectedField(final String key, final Class<?> type) {
+    public ExpectedField(final FieldKey key, final Class<?> type) {
         this.key = key;
         this.type = type;
     }
 
-    public String getKey() {
+    public FieldKey getKey() {
         return key;
     }
 

@@ -35,17 +35,18 @@ public class Config {
         return fields.stream()
                      .filter(this::isConfigMissingOrWronglyTyped)
                      .map(ExpectedField::getKey)
+                     .map(FieldKey::getKey)
                      .collect(toSet());
     }
 
     // todo this should be done on an interface-by-interface level. later.
     private boolean isConfigMissingOrWronglyTyped(final ExpectedField field) {
 
-        if (!jsonConfig.contains(field.getKey())) {
+        if (!jsonConfig.contains(field.getKey().getKey())) {
             return true;
         }
 
-        final Object value = jsonConfig.get(field.getKey());
+        final Object value = jsonConfig.get(field.getKey().getKey());
         final Optional<Class<?>> valueType = getSimpleType(value);
         if (!valueType.isPresent()) {
             return true;
@@ -62,13 +63,14 @@ public class Config {
         final Set<String> all = jsonConfig.getKeys();
         final Set<String> expected = fields.stream()
                                            .map(ExpectedField::getKey)
+                                           .map(FieldKey::getKey)
                                            .collect(toSet());
         final Set<String> unexpected = difference(all, expected);
         LOG.warn("Unexpected configs found: {}.", unexpected);
     }
 
-    public Object get(final String key) {
-        return jsonConfig.get(key);
+    public Object get(final FieldKey key) {
+        return jsonConfig.get(key.getKey());
     }
 
 }

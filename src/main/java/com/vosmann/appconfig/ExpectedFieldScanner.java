@@ -8,6 +8,8 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import static com.vosmann.appconfig.AllowedType.isAllowedReturnType;
+import static com.vosmann.appconfig.FieldKey.isBooleanGetter;
+import static com.vosmann.appconfig.FieldKey.isNormalGetter;
 import static java.util.stream.Collectors.toSet;
 
 public class ExpectedFieldScanner {
@@ -51,29 +53,12 @@ public class ExpectedFieldScanner {
             assertAllowed(type);
             assertAllowed(method.getParameterCount());
 
-            final String fieldName = toFieldName(methodName);
-            final String key = prefix + "." + fieldName;
+            final FieldKey key = new FieldKey(prefix, methodName);
 
             fields.add(new ExpectedField(key, type));
         }
 
         return fields;
-    }
-
-    private static String toFieldName(final String methodName) {
-        if (isNormalGetter(methodName)) {
-            return methodName.substring(3, 4).toLowerCase() + methodName.substring(4, methodName.length());
-        } else {
-            return methodName.substring(2, 3).toLowerCase() + methodName.substring(3, methodName.length());
-        }
-    }
-
-    private static boolean isNormalGetter(final String methodName) {
-        return methodName.startsWith("get") && methodName.charAt(3) == methodName.toUpperCase().charAt(3);
-    }
-
-    private static boolean isBooleanGetter(final String methodName) {
-        return methodName.startsWith("is") && methodName.charAt(3) == methodName.toUpperCase().charAt(3);
     }
 
     private static void assertAllowed(final String methodName) {
