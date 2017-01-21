@@ -12,7 +12,7 @@ public class Implementer {
         this.config = config;
     }
 
-    public <T> T implement(final Class<T> interfaceType) {
+    public <T> T implement(final Class<?> interfaceType) {
         final String prefix = interfaceType.getAnnotation(AppConfig.class).prefix();
         final Object interfaceImplementation = Proxy.newProxyInstance(interfaceType.getClassLoader(),
                                                                       new Class[]{interfaceType},
