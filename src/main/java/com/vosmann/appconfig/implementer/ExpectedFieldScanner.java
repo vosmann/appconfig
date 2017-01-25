@@ -1,5 +1,6 @@
-package com.vosmann.appconfig;
+package com.vosmann.appconfig.implementer;
 
+import com.vosmann.appconfig.annotations.AppConfig;
 import org.reflections.Reflections;
 
 import java.lang.reflect.Method;
@@ -7,9 +8,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import static com.vosmann.appconfig.AllowedType.isAllowedReturnType;
-import static com.vosmann.appconfig.FieldKey.isBooleanGetter;
-import static com.vosmann.appconfig.FieldKey.isNormalGetter;
 import static java.util.stream.Collectors.toSet;
 
 public class ExpectedFieldScanner {
@@ -62,13 +60,13 @@ public class ExpectedFieldScanner {
     }
 
     private static void assertAllowed(final String methodName) {
-        if (!isNormalGetter(methodName) && !isBooleanGetter(methodName)) {
+        if (!FieldKey.isNormalGetter(methodName) && !FieldKey.isBooleanGetter(methodName)) {
             throw new AppConfigException("Unexpected method name in interface: " + methodName);
         }
     }
 
     private static void assertAllowed(final Class<?> type) {
-        if (!isAllowedReturnType(type)) {
+        if (!AllowedType.isAllowedReturnType(type)) {
             throw new AppConfigException("Unsupported return value on config method: " + type);
         }
     }

@@ -1,4 +1,6 @@
-package com.vosmann.appconfig;
+package com.vosmann.appconfig.samples;
+
+import com.vosmann.appconfig.annotations.AppConfig;
 
 @AppConfig(prefix = "tracking.endpoint")
 public interface EndpointConfig {

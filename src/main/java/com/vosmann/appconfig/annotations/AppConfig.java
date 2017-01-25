@@ -1,4 +1,4 @@
-package com.vosmann.appconfig;
+package com.vosmann.appconfig.annotations;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

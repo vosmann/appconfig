@@ -1,4 +1,4 @@
-package com.vosmann.appconfig;
+package com.vosmann.appconfig.implementer;
 
 import java.util.List;
 import java.util.Objects;

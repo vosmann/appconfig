@@ -1,4 +1,4 @@
-package com.vosmann.appconfig;
+package com.vosmann.appconfig.implementer;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

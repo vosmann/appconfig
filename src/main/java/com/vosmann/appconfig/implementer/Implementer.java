@@ -1,4 +1,6 @@
-package com.vosmann.appconfig;
+package com.vosmann.appconfig.implementer;
+
+import com.vosmann.appconfig.annotations.AppConfig;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -19,16 +21,6 @@ public class Implementer {
                                                                       new InterfaceMethodHandler(prefix, config));
 
         final T implementation = (T) interfaceImplementation;
-        return implementation;
-    }
-
-    public Object implement2(final Class<?> interfaceType) {
-        final String prefix = interfaceType.getAnnotation(AppConfig.class).prefix();
-        final Object interfaceImplementation = Proxy.newProxyInstance(interfaceType.getClassLoader(),
-                                                                      new Class[]{interfaceType},
-                                                                      new InterfaceMethodHandler(prefix, config));
-
-        final Object implementation = interfaceType.cast(interfaceImplementation);
         return implementation;
     }
 

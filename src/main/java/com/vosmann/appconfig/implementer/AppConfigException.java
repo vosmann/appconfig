@@ -1,4 +1,4 @@
-package com.vosmann.appconfig;
+package com.vosmann.appconfig.implementer;
 
 public class AppConfigException extends RuntimeException {
 

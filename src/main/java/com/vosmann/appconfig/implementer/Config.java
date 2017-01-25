@@ -1,4 +1,4 @@
-package com.vosmann.appconfig;
+package com.vosmann.appconfig.implementer;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -8,8 +8,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.collect.Sets.difference;
-import static com.vosmann.appconfig.AllowedType.getSimpleType;
-import static com.vosmann.appconfig.ExpectedFieldScanner.scanExpectedFields;
 import static java.util.stream.Collectors.toSet;
 
 public class Config {
@@ -20,7 +18,7 @@ public class Config {
     private final JsonConfig jsonConfig;
 
     public Config(final InputStream appConfigFileStream) {
-        fields = scanExpectedFields();
+        fields = ExpectedFieldScanner.scanExpectedFields();
         jsonConfig = JsonConfig.from(appConfigFileStream);
         LOG.info(jsonConfig);
         LOG.info(fields);
@@ -47,7 +45,7 @@ public class Config {
         }
 
         final Object value = jsonConfig.get(field.getKey().getKey());
-        final Optional<Class<?>> valueType = getSimpleType(value);
+        final Optional<Class<?>> valueType = AllowedType.getSimpleType(value);
         if (!valueType.isPresent()) {
             return true;
         }

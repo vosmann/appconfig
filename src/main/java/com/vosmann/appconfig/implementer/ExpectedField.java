@@ -1,4 +1,4 @@
-package com.vosmann.appconfig;
+package com.vosmann.appconfig.implementer;
 
 import com.google.common.base.Objects;
 
