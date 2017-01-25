@@ -1,6 +1,9 @@
-package com.vosmann.appconfig.implementer;
+package com.vosmann.appconfig;
 
 import com.google.inject.PrivateModule;
+import com.vosmann.appconfig.implementer.Config;
+import com.vosmann.appconfig.implementer.ExpectedFieldScanner;
+import com.vosmann.appconfig.implementer.Implementer;
 
 import java.io.InputStream;
 
@@ -26,9 +29,9 @@ public class AppConfigModule extends PrivateModule {
         final Implementer implementer = new Implementer(config);
         ExpectedFieldScanner.scanAppConfigInterfaces()
                             .forEach(interfaceType -> {
-                    bind(interfaceType).toInstance(implementer.implement(interfaceType));
-                    expose(interfaceType);
-                });
+                                bind(interfaceType).toInstance(implementer.implement(interfaceType));
+                                expose(interfaceType);
+                            });
     }
 
 }

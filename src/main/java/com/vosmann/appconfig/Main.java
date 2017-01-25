@@ -2,7 +2,6 @@ package com.vosmann.appconfig;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.vosmann.appconfig.implementer.AppConfigModule;
 import com.vosmann.appconfig.samples.EndpointConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
