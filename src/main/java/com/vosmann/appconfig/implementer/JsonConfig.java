@@ -45,7 +45,7 @@ public class JsonConfig {
         return new JsonConfig(flattenedJson);
     }
 
-    public static Map<String, Object> flatten(final JsonNode json) {
+    private static Map<String, Object> flatten(final JsonNode json) {
         final Map<String, Object> map = new HashMap<>();
         final String initialKeyPrefix = "";
         addKeys(json, initialKeyPrefix, map);
