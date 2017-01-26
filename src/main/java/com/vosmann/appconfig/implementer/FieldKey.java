@@ -29,4 +29,8 @@ public class FieldKey {
         return methodName.startsWith("is") && methodName.charAt(3) == methodName.toUpperCase().charAt(3);
     }
 
+    @Override
+    public String toString() {
+        return key;
+    }
 }

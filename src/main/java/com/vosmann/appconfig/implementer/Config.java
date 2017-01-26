@@ -3,9 +3,11 @@ package com.vosmann.appconfig.implementer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.InputStream;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import static com.google.common.collect.Sets.difference;
 import static java.util.stream.Collectors.toSet;
@@ -14,31 +16,50 @@ public class Config {
 
     private static final Logger LOG = LogManager.getLogger(Config.class);
 
-    private final Set<ExpectedField> fields;
-    private final JsonConfig jsonConfig;
+    private static final long INITIAL_DELAY_IN_SEC = 30;
+    private static final long PERIOD_IN_SEC = 10;
 
-    public Config(final InputStream appConfigFileStream) {
-        fields = ExpectedFieldScanner.scanExpectedFields();
-        jsonConfig = JsonConfig.from(appConfigFileStream);
-        LOG.info(jsonConfig);
-        LOG.info(fields);
-        logUnexpectedConfigs();
-        final Set<String> missingConfigs = findMissingConfigs();
+    private final Set<ExpectedField> fields;
+    private final String fileLocation;
+    private final ScheduledExecutorService executor;
+
+    private JsonConfig jsonConfig;
+
+    public Config(final String fileLocation) {
+        this.fields = ExpectedFieldScanner.scanExpectedFields();
+        this.fileLocation = fileLocation;
+        this.jsonConfig = loadJsonConfig();
+
+        executor = Executors.newSingleThreadScheduledExecutor();
+        executor.scheduleAtFixedRate(() -> this.jsonConfig = loadJsonConfig(),
+                                     INITIAL_DELAY_IN_SEC,
+                                     PERIOD_IN_SEC,
+                                     TimeUnit.SECONDS);
+    }
+
+    private JsonConfig loadJsonConfig() {
+        final JsonConfig jsonConfig = JsonConfig.from(fileLocation);
+
+        LOG.info("Loaded a JSON config from {}. JSON config: {}.", fileLocation, jsonConfig);
+        logUnexpectedConfigs(jsonConfig);
+        final Set<String> missingConfigs = findMissingConfigs(jsonConfig);
         if (!missingConfigs.isEmpty()) {
             throw new AppConfigException("Missing or wrongly typed configs: " + missingConfigs);
         }
+
+        return jsonConfig;
     }
 
-    private Set<String> findMissingConfigs() {
+    private Set<String> findMissingConfigs(final JsonConfig jsonConfig) {
         return fields.stream()
-                     .filter(this::isConfigMissingOrWronglyTyped)
+                     .filter(field -> isConfigMissingOrWronglyTyped(field, jsonConfig))
                      .map(ExpectedField::getKey)
                      .map(FieldKey::getKey)
                      .collect(toSet());
     }
 
     // todo fix the unwieldy .getKey().getKey() call.
-    private boolean isConfigMissingOrWronglyTyped(final ExpectedField field) {
+    private boolean isConfigMissingOrWronglyTyped(final ExpectedField field, final JsonConfig jsonConfig) {
 
         if (!jsonConfig.contains(field.getKey().getKey())) {
             return true;
@@ -57,7 +78,7 @@ public class Config {
         return false;
     }
 
-    private void logUnexpectedConfigs() {
+    private void logUnexpectedConfigs(final JsonConfig jsonConfig) {
         final Set<String> all = jsonConfig.getKeys();
         final Set<String> expected = fields.stream()
                                            .map(ExpectedField::getKey)

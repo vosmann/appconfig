@@ -5,11 +5,9 @@ import com.vosmann.appconfig.implementer.Config;
 import com.vosmann.appconfig.implementer.ExpectedFieldScanner;
 import com.vosmann.appconfig.implementer.Implementer;
 
-import java.io.InputStream;
-
 public class AppConfigModule extends PrivateModule {
 
-    private static final String DEFAULT_APP_CONFIG_FILE_LOCATION = "appconfig.json";
+    private static final String DEFAULT_APP_CONFIG_FILE_LOCATION = "src/main/resources/appconfig.json";
 
     private final String appConfigFileLocation;
 
@@ -23,9 +21,7 @@ public class AppConfigModule extends PrivateModule {
 
     @Override
     protected void configure() {
-        final InputStream fileStream = AppConfigModule.class.getClassLoader()
-                                                            .getResourceAsStream(appConfigFileLocation);
-        final Config config = new Config(fileStream);
+        final Config config = new Config(appConfigFileLocation);
         final Implementer implementer = new Implementer(config);
         ExpectedFieldScanner.scanAppConfigInterfaces()
                             .forEach(interfaceType -> {

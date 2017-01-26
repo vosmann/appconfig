@@ -1,6 +1,8 @@
 package com.vosmann.appconfig.implementer;
 
 import com.vosmann.appconfig.annotations.AppConfig;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.reflections.Reflections;
 
 import java.lang.reflect.Method;
@@ -12,6 +14,7 @@ import static java.util.stream.Collectors.toSet;
 
 public class ExpectedFieldScanner {
 
+    private static final Logger LOG = LogManager.getLogger(ExpectedFieldScanner.class);
     private static final String ALL_PACKAGES_PREFIX = "";
     private static final Set<Class<?>> ALLOWED_CONFIG_TYPES;
 
@@ -27,6 +30,7 @@ public class ExpectedFieldScanner {
         final Set<ExpectedField> fields = scanAppConfigInterfaces().map(ExpectedFieldScanner::extractExpectedFields)
                                                                    .flatMap(fs -> fs.stream())
                                                                    .collect(toSet());
+        LOG.info(fields);
         return fields;
     }
 

@@ -57,7 +57,6 @@ public class JsonConfig {
             final ObjectNode object = (ObjectNode) node;
             object.fields()
                   .forEachRemaining(entry -> addKeys(entry.getValue(), nextPath(currentPath, entry.getKey()), map));
-
         } else if (node.isArray()) {
             throw new IllegalArgumentException("Array values not supported.");
         } else if (node.isValueNode()) {
