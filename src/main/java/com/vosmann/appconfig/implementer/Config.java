@@ -3,6 +3,7 @@ package com.vosmann.appconfig.implementer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.IOException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Executors;
@@ -38,7 +39,13 @@ public class Config {
     }
 
     private JsonConfig loadJsonConfig() {
-        final JsonConfig jsonConfig = JsonConfig.from(fileLocation);
+        final JsonConfig jsonConfig;
+        try {
+            jsonConfig = JsonConfig.from(fileLocation);
+        } catch (final IOException e) {
+            LOG.error("Could not load appconfig.json file.");
+            throw new AppConfigException("Could not read file.", e);
+        }
 
         LOG.info("Loaded a JSON config from {}. JSON config: {}.", fileLocation, jsonConfig);
         logUnexpectedConfigs(jsonConfig);

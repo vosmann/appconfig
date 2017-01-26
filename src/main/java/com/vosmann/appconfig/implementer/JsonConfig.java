@@ -22,25 +22,17 @@ public class JsonConfig {
         this.config = config;
     }
 
-    public static JsonConfig fromDefaultLocation() {
+    public static JsonConfig fromDefaultLocation() throws IOException {
         return from("src/test/resources/appconfig.json");
     }
 
-    public static JsonConfig from(final String location) {
-        try {
-            return from(new FileInputStream(location));
-        } catch (final IOException e) {
-            throw new AppConfigException("Could not read file.", e);
-        }
+    public static JsonConfig from(final String location) throws IOException {
+        return from(new FileInputStream(location));
     }
 
-    public static JsonConfig from(final InputStream inputStream) {
-        final JsonNode root;
-        try {
-            root = OBJECT_MAPPER.readTree(inputStream);
-        } catch (final IOException e) {
-            throw new AppConfigException("Could not read file.", e);
-        }
+    public static JsonConfig from(final InputStream inputStream) throws IOException {
+        final JsonNode root = OBJECT_MAPPER.readTree(inputStream);
+        inputStream.close();
         final Map<String, Object> flattenedJson = flatten(root);
         return new JsonConfig(flattenedJson);
     }
