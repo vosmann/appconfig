@@ -2,11 +2,16 @@ package com.vosmann.appconfig.implementer;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.asynchttpclient.AsyncHttpClient;
+import org.asynchttpclient.DefaultAsyncHttpClient;
+import org.asynchttpclient.Response;
 
 import java.io.IOException;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -17,28 +22,37 @@ public class Config {
 
     private static final Logger LOG = LogManager.getLogger(Config.class);
 
-    private static final long INITIAL_DELAY_IN_SEC = 30;
-    private static final long PERIOD_IN_SEC = 10;
+    private static final long INITIAL_DELAY_IN_SEC = 60;
+    private static final long PERIOD_IN_SEC = 30;
+
+    private final String fileLocation;
+    private final String url;
 
     private final Set<ExpectedField> fields;
-    private final String fileLocation;
     private final ScheduledExecutorService executor;
 
     private JsonConfig jsonConfig;
 
-    public Config(final String fileLocation) {
-        this.fields = ExpectedFieldScanner.scanExpectedFields();
+    public Config(final String fileLocation, final String url) {
         this.fileLocation = fileLocation;
-        this.jsonConfig = loadJsonConfig();
+        this.url = url;
+
+        this.fields = ExpectedFieldScanner.scanExpectedFields();
+        this.jsonConfig = loadJsonConfigFromServer();
+        // this.jsonConfig = loadJsonConfigFromFile();
 
         executor = Executors.newSingleThreadScheduledExecutor();
-        executor.scheduleAtFixedRate(() -> this.jsonConfig = loadJsonConfig(),
+        executor.scheduleAtFixedRate(this::updateJsonConfigFromServer,
                                      INITIAL_DELAY_IN_SEC,
                                      PERIOD_IN_SEC,
                                      TimeUnit.SECONDS);
     }
 
-    private JsonConfig loadJsonConfig() {
+    public Object get(final FieldKey key) {
+        return jsonConfig.get(key.getKey());
+    }
+
+    private JsonConfig loadJsonConfigFromFile() {
         final JsonConfig jsonConfig;
         try {
             jsonConfig = JsonConfig.from(fileLocation);
@@ -55,6 +69,28 @@ public class Config {
         }
 
         return jsonConfig;
+    }
+
+    private void updateJsonConfigFromServer() {
+        final JsonConfig jsonConfig = loadJsonConfigFromServer();
+        if (jsonConfig != null) {
+            this.jsonConfig = jsonConfig;
+            LOG.info("Updated app config.");
+        } else {
+            LOG.warn("Could not update app config.");
+        }
+    }
+
+    private JsonConfig loadJsonConfigFromServer() {
+        final AsyncHttpClient asyncHttpClient = new DefaultAsyncHttpClient();
+        final Future<Response> response = asyncHttpClient.prepareGet(url)
+                                                         .execute();
+        try {
+            return JsonConfig.from(response.get()
+                                           .getResponseBodyAsStream());
+        } catch (IOException | InterruptedException | ExecutionException e) {
+            return null;
+        }
     }
 
     private Set<String> findMissingConfigs(final JsonConfig jsonConfig) {
@@ -93,10 +129,6 @@ public class Config {
                                            .collect(toSet());
         final Set<String> unexpected = difference(all, expected);
         LOG.warn("Unexpected configs found: {}.", unexpected);
-    }
-
-    public Object get(final FieldKey key) {
-        return jsonConfig.get(key.getKey());
     }
 
 }

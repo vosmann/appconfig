@@ -22,10 +22,6 @@ public class JsonConfig {
         this.config = config;
     }
 
-    public static JsonConfig fromDefaultLocation() throws IOException {
-        return from("src/test/resources/appconfig.json");
-    }
-
     public static JsonConfig from(final String location) throws IOException {
         return from(new FileInputStream(location));
     }

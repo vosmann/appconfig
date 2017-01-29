@@ -7,9 +7,13 @@ import com.vosmann.appconfig.AppConfigModule;
 
 public class Main {
 
+    private static final String LOCATION_ON_FILESYSTEM = "/tmp/appconfig.json";
+    private static final String LOCATION_ON_SERVER =
+            "https://raw.githubusercontent.com/vosmann/appconfig/master/src/test/resources/appconfig.json";
+
     public static void main(final String[] args) {
 
-        final Injector injector = Guice.createInjector(new AppConfigModule("/tmp/appconfig.json"),
+        final Injector injector = Guice.createInjector(new AppConfigModule(LOCATION_ON_FILESYSTEM, LOCATION_ON_SERVER),
                                                        new PrivateModule() {
                                                            @Override
                                                            protected void configure() {
