@@ -3,7 +3,7 @@
     "endpoint": {
       "scheme": "http",
       "host": "an.example.com",
-      "port": 60000,
+      "port": 22200,
       "timeout": 500
     }
   }
